@@ -12,6 +12,9 @@ npm install xstate
 npm install xstate@latest
 ```
 
+[📉 See the visualization on stately.ai/viz](https://stately.ai/viz/92a01aa7-3382-4e4d-a82b-9126afd99fd2 "Vending Machine state diagram")
+
+
 ## Available Scripts
 
 In the project directory, to run react server you can use:
