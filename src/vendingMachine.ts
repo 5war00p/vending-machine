@@ -1,6 +1,18 @@
 import { createMachine } from "xstate";
 
-interface Context {
+type VMEvents =
+  | { type: "BOOK_SELECTION" }
+  | { type: "BUYING"; actual_price: number }
+  | { type: "NOTBUYING" }
+  | { type: "CANCEL" }
+  | { type: "HOME" }
+  | { type: "CALC" }
+  | { type: "EQUAL"; cash: number; actual_price: number }
+  | { type: "LESSER"; cash: number; actual_price: number }
+  | { type: "GREATER"; cash: number; actual_price: number }
+  | { type: "RETURN" };
+
+interface VMContext {
   required_amount: number;
   received_amount: number;
   remaining_amount: number;
@@ -12,12 +24,12 @@ const paymentFSM = {
   states: {
     take: {
       on: {
-        NEXT: "check",
+        CALC: "check",
       },
     },
     check: {
       on: {
-        SUCCESS: {
+        EQUAL: {
           target: "complete",
           actions: ["accept"],
           cond: "isEqual",
@@ -33,7 +45,7 @@ const paymentFSM = {
   },
 };
 
-const vendingMachine = createMachine<Context>(
+const vendingMachine = createMachine<VMContext, VMEvents>(
   {
     id: "VM",
     initial: "start",
@@ -52,12 +64,13 @@ const vendingMachine = createMachine<Context>(
       },
       book: {
         on: {
-          YES: { target: "payment", actions: ["pay"] },
-          NO: { target: "book" },
+          BUYING: { target: "payment", actions: ["pay"] },
+          NOTBUYING: { target: "book" },
           CANCEL: { target: "cancel" },
         },
       },
       payment: {
+        type: "compound",
         invoke: {
           id: "main",
           src: "paymentFSM",
@@ -69,12 +82,12 @@ const vendingMachine = createMachine<Context>(
       },
       success: {
         on: {
-          TRY_ANOTHER: "start",
+          HOME: "start",
         },
       },
       failure: {
         on: {
-          TRY_AGAIN: "start",
+          HOME: "start",
         },
       },
       cancel: {
