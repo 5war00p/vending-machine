@@ -1,7 +1,27 @@
 import { createMachine } from "xstate";
 
+const paymentFSM = {
+  initial: "take",
+  states: {
+    take: {
+      on: {
+        NEXT: "check",
+      },
+    },
+    check: {
+      on: {
+        SUCCESS: "complete",
+        LESSER: "take",
+        GREATER: "return",
+      },
+    },
+    complete: {},
+    return: {},
+  },
+};
+
 const vendingMachine = createMachine<undefined>({
-  id: "vending",
+  id: "VM",
   initial: "start",
   states: {
     start: {
@@ -21,6 +41,7 @@ const vendingMachine = createMachine<undefined>({
         DONE: "success",
         FAILED: "failure",
       },
+      ...paymentFSM,
     },
     success: {
       on: {
@@ -29,7 +50,7 @@ const vendingMachine = createMachine<undefined>({
     },
     failure: {
       on: {
-        TRY_AGAIN: "start",
+        TRY_AGAIN: "payment",
       },
     },
   },
