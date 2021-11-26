@@ -12,6 +12,11 @@ npm install xstate
 npm install xstate@latest
 ```
 
+## React hooks and utilities for using XState in React applications
+```
+npm install @xstate/react
+```
+
 [📉 See the visualization on stately.ai/viz](https://stately.ai/viz/92a01aa7-3382-4e4d-a82b-9126afd99fd2 "Vending Machine state diagram")
 
 
