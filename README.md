@@ -2,6 +2,8 @@
 
 Building a state machine for the Vending Machine using **XState** pacakge which a customer can request to buy a book and pay the cash as machine acceptable currency  notes or coins with the simple UI using **React** which gives a vision of the entire vending machine process.
 
+### access the app on netlify url: https://pedantic-volhard-cf43a6.netlify.app/
+
 ## Installation of XState
 ```
 npm install xstate
