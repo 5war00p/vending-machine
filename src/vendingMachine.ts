@@ -98,9 +98,6 @@ const vendingMachine = createMachine<VMContext, VMEvents>(
     },
   },
   {
-    services: {
-      paymentFSM: (context) => (send) => {},
-    },
     actions: {
       setup: (context, event) => {
         context.required_amount = 0;
