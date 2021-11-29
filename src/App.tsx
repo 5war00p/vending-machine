@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./App.css";
 import { useMachine } from "@xstate/react";
 import { vendingMachine } from "./vendingMachine";
-import { interpret } from "xstate";
 
 // Books as a Array of Objects
 const BOOKS = [
@@ -37,11 +36,6 @@ const getBookList = () => {
   return bookList;
 };
 
-// vending machine service
-const service = interpret(vendingMachine)
-  .onTransition((state) => console.log(state.value))
-  .start();
-
 function App() {
   // to maintain users book choice
   const [choosenBook, setBook] = useState("");
@@ -55,7 +49,7 @@ function App() {
     actualPrice: 0,
   });
 
-  const [currentState, _send] = useMachine(vendingMachine);
+  let [currentState, send] = useMachine(vendingMachine);
 
   return (
     <div>
@@ -63,10 +57,16 @@ function App() {
         {/* start button */}
         <button
           type="button"
-          className="btn btn-primary"
+          id="start-button"
+          className="btn btn-primary mr-3"
           onClick={(e) => {
             if (currentState.matches("start")) {
-              service.send("BOOK_SELECTION");
+              send("BOOK_SELECTION");
+              currentState = vendingMachine.transition(
+                currentState,
+                "BOOK_SELECTION"
+              );
+
               (e.target as HTMLInputElement).classList.replace(
                 "btn-primary",
                 "btn-secondary"
@@ -75,6 +75,31 @@ function App() {
           }}
         >
           START
+        </button>
+      </div>
+      <div className="mt-5 ml-5">
+        {/* start button */}
+        <button
+          type="button"
+          className="btn btn-primary mr-3"
+          onClick={(e) => {
+            if (currentState.matches("book")) {
+              send("CANCEL");
+              currentState = vendingMachine.transition(currentState, "CANCEL");
+              send("HOME");
+              currentState = vendingMachine.transition(currentState, "HOME");
+
+              (e.target as HTMLInputElement).classList.replace(
+                "btn-primary",
+                "btn-secondary"
+              );
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            }
+          }}
+        >
+          CANCEL
         </button>
       </div>
       <div className="container p-5">
@@ -86,14 +111,17 @@ function App() {
           onChange={(e) => {
             const selectedBook = e.target.value;
             let price = parseInt(selectedBook.split(",")[2]);
-            if (selectedBook === "select") service.send("CANCEL");
-            else if (selectedBook !== "select" && choosenBook !== "") {
-              service.send("NOTBUYING");
+            if (selectedBook !== "select" && choosenBook !== "") {
+              send("NOTBUYING");
+              currentState = vendingMachine.transition(
+                currentState,
+                "NOTBUYING"
+              );
             } else {
-              service.send("BUYING", {
+              send("BUYING", {
                 actual_price: price,
               });
-              service.send("CALC");
+              currentState = vendingMachine.transition(currentState, "BUYING");
             }
             setMoney({ ...inputMoney, actualPrice: price });
             setBook(selectedBook);
@@ -164,6 +192,9 @@ function App() {
         <button
           className="btn btn-outline-primary mr-3"
           onClick={() => {
+            send("CALC");
+            currentState = vendingMachine.transition(currentState, "CALC");
+
             let givenAmount =
               preAmount.paidAmount +
               inputMoney.tenCoins * 10 +
@@ -175,16 +206,18 @@ function App() {
             console.log(preAmount.paidAmount, price);
 
             if (givenAmount < price) {
-              service.send("LESSER", {
+              send("LESSER", {
                 cash: givenAmount,
                 actual_price: inputMoney.actualPrice,
               });
+              currentState = vendingMachine.transition(currentState, "LESSER");
             }
             if (givenAmount > price) {
-              service.send("GREATER", {
+              send("GREATER", {
                 cash: givenAmount,
                 actual_price: inputMoney.actualPrice,
               });
+              currentState = vendingMachine.transition(currentState, "GREATER");
 
               setTimeout(() => {
                 setGivenAmount({
@@ -199,13 +232,16 @@ function App() {
                 });
               }, 2000);
 
-              service.send("RETURN");
+              send("RETURN");
+              currentState = vendingMachine.transition(currentState, "RETURN");
             }
             if (givenAmount === price) {
-              service.send("EQUAL", {
+              send("EQUAL", {
                 cash: givenAmount,
                 actual_price: inputMoney.actualPrice,
               });
+              currentState = vendingMachine.transition(currentState, "EQUAL");
+
               setTimeout(() => {
                 setGivenAmount({
                   ...preAmount,
