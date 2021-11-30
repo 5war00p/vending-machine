@@ -13,6 +13,9 @@ type VMEvents =
   | { type: "RETURN" };
 
 interface VMContext {
+  tenNotes: number;
+  twentyNotes: number;
+  fiftyNotes: number;
   required_amount: number;
   received_amount: number;
   remaining_amount: number;
@@ -24,7 +27,10 @@ const paymentFSM = {
   states: {
     take: {
       on: {
-        CALC: "check",
+        CALC: {
+          target: "check",
+          actions: ["setTenNotes", "setTwentyNotes", "setFiftyNotes"],
+        },
       },
     },
     check: {
@@ -51,6 +57,9 @@ const vendingMachine = createMachine<VMContext, VMEvents>(
     initial: "start",
     // the initial context (extended state) of the statechart
     context: {
+      tenNotes: NaN,
+      twentyNotes: NaN,
+      fiftyNotes: NaN,
       required_amount: 0,
       received_amount: 0,
       remaining_amount: 0,
@@ -99,6 +108,18 @@ const vendingMachine = createMachine<VMContext, VMEvents>(
   },
   {
     actions: {
+      setTenNotes: (context, event) => {
+        const { tenNotes }: any = event;
+        context.tenNotes = tenNotes;
+      },
+      setTwentyNotes: (context, event) => {
+        const { twentyNotes }: any = event;
+        context.twentyNotes = twentyNotes;
+      },
+      setFiftyNotes: (context, event) => {
+        const { fiftyNotes }: any = event;
+        context.fiftyNotes = fiftyNotes;
+      },
       setup: (context, event) => {
         context.required_amount = 0;
         context.received_amount = 0;

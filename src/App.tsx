@@ -120,6 +120,9 @@ function App() {
             } else {
               send("BUYING", {
                 actual_price: price,
+                tenNotes: 0,
+                twentyNotes: 0,
+                fiftyNotes: 0,
               });
               currentState = vendingMachine.transition(currentState, "BUYING");
             }
@@ -203,7 +206,6 @@ function App() {
 
             setGivenAmount({ ...preAmount, paidAmount: givenAmount });
             let price = inputMoney.actualPrice;
-            console.log(preAmount.paidAmount, price);
 
             if (givenAmount < price) {
               send("LESSER", {
